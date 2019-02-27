@@ -15,16 +15,6 @@ set(CMAKE_MODULE_PATH
 message(STATUS "Building for ${CMAKE_SYSTEM_NAME} target system")
 message(STATUS "Building with ${CMAKE_C_COMPILER_ID} compiler")
 
-set(freetype-gl_WITH_GLEW_DEFAULT ON)
-
-if((${CMAKE_SYSTEM_NAME} MATCHES "Darwin") OR
-    (${CMAKE_SYSTEM_NAME} MATCHES "Android"))
-    set(freetype-gl_WITH_GLEW_DEFAULT OFF)
-endif()
-
-option(freetype-gl_WITH_GLEW
-    "Use the GLEW library to fetch OpenGL function pointers"
-    ${freetype-gl_WITH_GLEW_DEFAULT})
 option(freetype-gl_USE_VAO "Use a VAO to render a vertex_buffer instance (required for forward compatible OpenGL 3.0 contexts)" OFF)
 option(freetype-gl_BUILD_DEMOS "Build the freetype-gl example programs" ON)
 option(freetype-gl_BUILD_APIDOC "Build the freetype-gl API documentation" ON)
@@ -84,10 +74,6 @@ endif()
 find_package(OpenGL REQUIRED)
 find_package(Freetype REQUIRED)
 
-if(freetype-gl_WITH_GLEW)
-    find_package(GLEW REQUIRED)
-endif()
-
 include_directories(
     ${OPENGL_INCLUDE_DIRS}
     ${FREETYPE_INCLUDE_DIRS}
@@ -120,6 +106,9 @@ set(FREETYPE_GL_HDR
     vector.h
     vertex-attribute.h
     vertex-buffer.h
+    
+    extloader/glad.h
+    extloader/khrplatform.h
 )
 
 set(FREETYPE_GL_SRC
@@ -134,6 +123,8 @@ set(FREETYPE_GL_SRC
     vector.c
     vertex-attribute.c
     vertex-buffer.c
+
+    extloader/glad.c
 )
 
 add_library(freetype-gl STATIC
@@ -149,7 +140,6 @@ if(freetype-gl_BUILD_MAKEFONT)
         ${OPENGL_LIBRARY}
         ${FREETYPE_LIBRARIES}
         ${MATH_LIBRARY}
-        ${GLEW_LIBRARY}
     )
 
     if(MSVC AND NOT (MSVC_VERSION LESS 1900))
